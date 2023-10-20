@@ -50,6 +50,16 @@ Halt:
 	j	$31
 	.end Halt
 
+
+	.globl Create
+	.ent Create
+Create:
+	addiu $2,$0,SC_Create
+	syscall
+	j $31
+	.end Create
+	
+
 	.globl Add
 	.ent	Add
 Add:
