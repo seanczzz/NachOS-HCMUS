@@ -126,17 +126,11 @@ halt: halt.o start.o
 	$(LD) $(LDFLAGS) start.o halt.o -o halt.coff
 	$(COFF2NOFF) halt.coff halt
 
-# createfile.o: createfile.c
-# $(CC) $(CFLAGS) -c createfile.c
-# createfile: createfile.o start.o
-# $(LD) $(LDFLAGS) start.o createfile.o -o createfile.coff
-# # ../bin/coff2noff createfile.coff createfile
-
-# createfile.o: createfile.c
-# $(CC) $(CFLAGS) -c createfile.c
-# createfile: createfile.o start.o
-# $(LD) $(LDFLAGS) start.o createfile.o -o createfile.coff
-# $(COFF2NOFF) createfile.coff createfile
+createfile.o: createfile.c
+	$(CC) $(CFLAGS) -c createfile.c
+createfile: createfile.o start.o
+	$(LD) $(LDFLAGS) start.o createfile.o -o createfile.coff
+	$(COFF2NOFF) createfile.coff createfile
 
 add.o: add.c
 	$(CC) $(CFLAGS) -c add.c
