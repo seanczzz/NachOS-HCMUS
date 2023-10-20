@@ -67,6 +67,59 @@ void ExceptionHandler(ExceptionType which)
 			ASSERTNOTREACHED();
 			break;
 
+		case SC_Create:
+
+			int virtAddr;
+			char *filename;
+			DEBUG(dbgAddr, "\n SC_Create call ...");
+			DEBUG(dbgAddr, "\n Reading virtual address of filename");
+			// Lấy tham số tên tập tin từ thanh ghi r4
+			virtAddr = kernel->machine->ReadRegister(4);
+			DEBUG(dbgAddr, "\n Reading filename.");
+			// MaxFileLength là = 32
+			filename = User2System(virtAddr, MaxFileLength + 1);
+			if (filename == NULL)
+			{
+				printf("\n Not enough memory in system");
+				DEBUG(dbgAddr, "\n Not enough memory in system");
+				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+				// trình người dùng
+				delete filename;
+				return;
+			}
+			DEBUG(dbgAddr, "\n Finish reading filename.");
+			// DEBUG(dbgAddr,"\n File name : '"<<filename<<"'");
+			//  Create file with size = 0
+			//  Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
+			//  việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
+			//  hành Linux, chúng ta không quản ly trực tiếp các block trên
+			//  đĩa cứng cấp phát cho file, việc quản ly các block của file
+			//  trên ổ đĩa là một đồ án khác
+			if (!kernel->fileSystem->Create(filename, 0))
+			{
+				printf("\n Error create file '%s'", filename);
+				kernel->machine->WriteRegister(2, -1);
+				delete filename;
+				return;
+			}
+			kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
+			// người dùng thành công
+			delete filename;
+
+			/* Modify return point */
+			{
+				/* set previous programm counter (debugging only)*/
+				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+				/* set next programm counter for brach execution */
+				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+			}
+
+			return;
+
 		case SC_Add:
 			DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
 

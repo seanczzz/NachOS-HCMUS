@@ -37,6 +37,8 @@
 #include "sysdep.h"
 #include "openfile.h"
 
+#define MaxFileLength 32
+
 #ifdef FILESYS_STUB // Temporarily implement file system calls as
 										// calls to UNIX, until the real file system
 										// implementation is available
@@ -45,7 +47,7 @@ class FileSystem
 public:
 	FileSystem() {}
 
-	bool Create(char *name)
+	bool Create(char *name, int initialSize)
 	{
 		int fileDescriptor = OpenForWrite(name);
 
