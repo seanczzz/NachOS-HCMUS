@@ -48,6 +48,32 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
+void updateProgramCounter()
+{
+	/* set previous programm counter (debugging only)*/
+	kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+
+	/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+
+	/* set next programm counter for brach execution */
+	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
+}
+
+void HandleSysCall_Open()
+{
+	DEBUG(dbgSys, "Opening files.....\n");
+
+	int virtAddr = kernel->machine->ReadRegister(4);
+	DEBUG(dbgAddr, "\n Reading filename.");
+	// MaxFileLength là = 32
+	char *filename = User2System(virtAddr, MaxFileLength + 1);
+
+	int openMode = kernel->machine->ReadRegister(5);
+	kernel->machine->WriteRegister(2, kernel->fileSystem->Open(filename, openMode));
+	delete filename;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -65,6 +91,11 @@ void ExceptionHandler(ExceptionType which)
 			SysHalt();
 
 			ASSERTNOTREACHED();
+			break;
+
+		case SC_Open:
+			HandleSysCall_Open();
+			updateProgramCounter();
 			break;
 
 		case SC_Create:
@@ -107,16 +138,7 @@ void ExceptionHandler(ExceptionType which)
 			delete filename;
 
 			/* Modify return point */
-			{
-				/* set previous programm counter (debugging only)*/
-				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-				/* set next programm counter for brach execution */
-				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-			}
+			updateProgramCounter();
 
 			return;
 
@@ -133,16 +155,7 @@ void ExceptionHandler(ExceptionType which)
 			kernel->machine->WriteRegister(2, (int)result);
 
 			/* Modify return point */
-			{
-				/* set previous programm counter (debugging only)*/
-				kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-				/* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-				kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-				/* set next programm counter for brach execution */
-				kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-			}
+			updateProgramCounter();
 
 			return;
 

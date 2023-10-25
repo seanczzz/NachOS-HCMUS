@@ -9,6 +9,7 @@ int main()
   char filename[maxlen + 1];
 
   /*Create a file*/
-  Create("Hello.txt");
+  Create("LeHuynhCuong.txt");
+
   Halt();
 }
