@@ -60,6 +60,46 @@ void updateProgramCounter()
 	kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
 }
 
+void HandleSysCall_Create()
+{
+	int virtAddr;
+	char *filename;
+	DEBUG(dbgAddr, "\n SC_Create call ...");
+	DEBUG(dbgAddr, "\n Reading virtual address of filename");
+	// Lấy tham số tên tập tin từ thanh ghi r4
+	virtAddr = kernel->machine->ReadRegister(4);
+	DEBUG(dbgAddr, "\n Reading filename.");
+	// MaxFileLength là = 32
+	filename = User2System(virtAddr, MaxFileLength + 1);
+	if (filename == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG(dbgAddr, "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+		// trình người dùng
+		delete filename;
+		return;
+	}
+	DEBUG(dbgAddr, "\n Finish reading filename.");
+	// DEBUG(dbgAddr,"\n File name : '"<<filename<<"'");
+	//  Create file with size = 0
+	//  Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
+	//  việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
+	//  hành Linux, chúng ta không quản ly trực tiếp các block trên
+	//  đĩa cứng cấp phát cho file, việc quản ly các block của file
+	//  trên ổ đĩa là một đồ án khác
+	if (!kernel->fileSystem->Create(filename, 0))
+	{
+		printf("\n Error create file '%s'", filename);
+		kernel->machine->WriteRegister(2, -1);
+		delete filename;
+		return;
+	}
+	kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
+	// người dùng thành công
+	delete filename;
+}
+
 void HandleSysCall_Open()
 {
 	DEBUG(dbgSys, "Opening files.....\n");
@@ -70,8 +110,107 @@ void HandleSysCall_Open()
 	char *filename = User2System(virtAddr, MaxFileLength + 1);
 
 	int openMode = kernel->machine->ReadRegister(5);
-	kernel->machine->WriteRegister(2, kernel->fileSystem->Open(filename, openMode));
+
+	int openResult = kernel->fileSystem->Open(filename, openMode);
+	if (openResult == -1)
+	{
+		DEBUG(dbgSys, "Fail to opening files huhuh \n");
+	}
+	else
+	{
+		DEBUG(dbgSys, "Succeed in opening file with id= ");
+		DEBUG(dbgSys, openResult);
+		DEBUG(dbgSys, "\n");
+	}
+	kernel->machine->WriteRegister(2, openResult);
 	delete filename;
+}
+
+void HandleSysCall_Close()
+{
+	DEBUG(dbgSys, "Closing files.....\n");
+
+	int closeFileId = kernel->machine->ReadRegister(4);
+	int closeResult = kernel->fileSystem->Close(closeFileId);
+
+	if (closeResult == -1)
+	{
+		DEBUG(dbgSys, "Fail to close files huhuh \n");
+	}
+	else // closeResult == 0
+	{
+		DEBUG(dbgSys, "Succeed in closing file\n");
+	}
+
+	kernel->machine->WriteRegister(2, closeResult);
+}
+
+void HandleSysCall_Read()
+{
+	int virtAddr;
+	char *buffer;
+	DEBUG(dbgAddr, "\n SC_Read call ...");
+	DEBUG(dbgAddr, "\n Reading virtual address of buffer");
+	virtAddr = kernel->machine->ReadRegister(4);
+	buffer = User2System(virtAddr, MaxFileLength + 1);
+	if (buffer == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG(dbgAddr, "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+		// trình người dùng
+		delete buffer;
+		return;
+	}
+	int size = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	int readResult = kernel->fileSystem->Read(buffer, size, id);
+
+	if (readResult == -1)
+	{
+		DEBUG(dbgSys, "Fail to read files huhuh \n");
+	}
+	else // readResult == 0
+	{
+		DEBUG(dbgSys, "Succeed in reading file\n");
+	}
+	kernel->machine->WriteRegister(2, readResult);
+	delete buffer;
+}
+
+void HandleSysCall_Write()
+{
+	int virtAddr;
+	char *buffer;
+	DEBUG(dbgAddr, "\n SC_Write call ...");
+	DEBUG(dbgAddr, "\n Writing virtual address of buffer");
+	virtAddr = kernel->machine->ReadRegister(4);
+	buffer = User2System(virtAddr, MaxFileLength + 1);
+	if (buffer == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG(dbgAddr, "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+		// trình người dùng
+		delete buffer;
+		return;
+	}
+	int size = kernel->machine->ReadRegister(5);
+	int id = kernel->machine->ReadRegister(6);
+
+	int writeResult = kernel->fileSystem->Write(buffer, size, id);
+
+	if (writeResult == -1)
+	{
+		DEBUG(dbgSys, "Fail to write files huhuh \n");
+	}
+	else // writeResult == 0
+	{
+		DEBUG(dbgSys, "Succeed in writing file\n");
+	}
+	kernel->machine->WriteRegister(2, writeResult);
+	delete buffer;
 }
 
 void ExceptionHandler(ExceptionType which)
@@ -89,57 +228,32 @@ void ExceptionHandler(ExceptionType which)
 			DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 
 			SysHalt();
+			// ASSERTNOTREACHED();
+			return;
 
-			ASSERTNOTREACHED();
-			break;
+		case SC_Create:
+			HandleSysCall_Create();
+			updateProgramCounter();
+			return;
 
 		case SC_Open:
 			HandleSysCall_Open();
 			updateProgramCounter();
-			break;
+			return;
 
-		case SC_Create:
-
-			int virtAddr;
-			char *filename;
-			DEBUG(dbgAddr, "\n SC_Create call ...");
-			DEBUG(dbgAddr, "\n Reading virtual address of filename");
-			// Lấy tham số tên tập tin từ thanh ghi r4
-			virtAddr = kernel->machine->ReadRegister(4);
-			DEBUG(dbgAddr, "\n Reading filename.");
-			// MaxFileLength là = 32
-			filename = User2System(virtAddr, MaxFileLength + 1);
-			if (filename == NULL)
-			{
-				printf("\n Not enough memory in system");
-				DEBUG(dbgAddr, "\n Not enough memory in system");
-				kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
-				// trình người dùng
-				delete filename;
-				return;
-			}
-			DEBUG(dbgAddr, "\n Finish reading filename.");
-			// DEBUG(dbgAddr,"\n File name : '"<<filename<<"'");
-			//  Create file with size = 0
-			//  Dùng đối tượng fileSystem của lớp OpenFile để tạo file,
-			//  việc tạo file này là sử dụng các thủ tục tạo file của hệ điều
-			//  hành Linux, chúng ta không quản ly trực tiếp các block trên
-			//  đĩa cứng cấp phát cho file, việc quản ly các block của file
-			//  trên ổ đĩa là một đồ án khác
-			if (!kernel->fileSystem->Create(filename, 0))
-			{
-				printf("\n Error create file '%s'", filename);
-				kernel->machine->WriteRegister(2, -1);
-				delete filename;
-				return;
-			}
-			kernel->machine->WriteRegister(2, 0); // trả về cho chương trình
-			// người dùng thành công
-			delete filename;
-
-			/* Modify return point */
+		case SC_Close:
+			HandleSysCall_Close();
 			updateProgramCounter();
+			return;
 
+		case SC_Write:
+			HandleSysCall_Write();
+			updateProgramCounter();
+			return;
+
+		case SC_Read:
+			HandleSysCall_Read();
+			updateProgramCounter();
 			return;
 
 		case SC_Add:
@@ -159,9 +273,7 @@ void ExceptionHandler(ExceptionType which)
 
 			return;
 
-			ASSERTNOTREACHED();
-
-			break;
+			// ASSERTNOTREACHED();
 
 		default:
 			cerr << "Unexpected system call " << type << "\n";

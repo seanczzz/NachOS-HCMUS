@@ -78,8 +78,8 @@ public:
       return -1;
     int result = openFile[index]->Read(buffer, charCount);
     // if we cannot read enough bytes, we should return -2
-    if (result != charCount)
-      return -2;
+    // if (result != charCount)
+    //   return -2;
     return result;
   }
 

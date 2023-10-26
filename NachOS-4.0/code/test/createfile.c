@@ -6,10 +6,13 @@
 int main()
 {
   int len;
-  char filename[maxlen + 1];
 
   /*Create a file*/
-  Create("LeHuynhCuong.txt");
+  int a = Open("LeHuynhCuong.txt", 0);
+  // int b = Close(2);
+
+  char buffer[] = "dsddadassad";
+  int c = Write(buffer, 50, a);
 
   Halt();
 }
