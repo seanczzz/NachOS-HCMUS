@@ -35,6 +35,9 @@
 #define SC_ThreadExit 14
 #define SC_ThreadJoin 15
 
+#define SC_PrintString 16
+#define SC_PrintNum 17
+
 #define SC_Add 42
 
 #ifndef IN_ASM
@@ -62,6 +65,10 @@ int Add(int op1, int op2);
 
 /* This user program is done (status = 0 means exited normally). */
 void Exit(int status);
+
+void PrintNum(int num);
+
+void PrintString(char *buffer);
 
 /* A unique identifier for an executing user program (address space) */
 typedef int SpaceId;

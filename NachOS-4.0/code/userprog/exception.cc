@@ -51,6 +51,21 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
+#define MAX_PRINT_LENGTH 200
+void HandleSysCall_PrintString()
+{
+	int memPtr = kernel->machine->ReadRegister(4); // read address of C-string
+	char *buffer = User2System(memPtr, MAX_PRINT_LENGTH);
+	SysPrintString(buffer, strlen(buffer));
+	delete[] buffer;
+}
+
+void HandleSysCall_PrintNum()
+{
+	int num = kernel->machine->ReadRegister(4);
+	SysPrintNum(num);
+}
+
 void updateProgramCounter()
 {
 	/* set previous programm counter (debugging only)*/
@@ -228,6 +243,15 @@ void HandleSysCall_Write()
 	delete buffer;
 }
 
+void HandleSysCall_Seek()
+{
+	int pos = kernel->machine->ReadRegister(4);
+	int fileId = kernel->machine->ReadRegister(5);
+
+	int seekResult = kernel->fileSystem->Seek(pos, fileId);
+	kernel->machine->WriteRegister(2, seekResult);
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -244,6 +268,16 @@ void ExceptionHandler(ExceptionType which)
 
 			SysHalt();
 			// ASSERTNOTREACHED();
+			return;
+
+		case SC_PrintNum:
+			HandleSysCall_PrintNum();
+			updateProgramCounter();
+			return;
+
+		case SC_PrintString:
+			HandleSysCall_PrintString();
+			updateProgramCounter();
 			return;
 
 		case SC_Create:
@@ -268,6 +302,11 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Read:
 			HandleSysCall_Read();
+			updateProgramCounter();
+			return;
+
+		case SC_Seek:
+			HandleSysCall_Seek();
 			updateProgramCounter();
 			return;
 

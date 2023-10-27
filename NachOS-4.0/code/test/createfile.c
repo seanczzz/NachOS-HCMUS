@@ -19,5 +19,9 @@ int main()
   // char buffer[] = "I am working on NachOS project\n";
   // int c = Read(buffer, 100, 0);
 
+  // Seek
+  // int d = Seek(-1, a);
+  // PrintNum(d);
+
   Halt();
 }

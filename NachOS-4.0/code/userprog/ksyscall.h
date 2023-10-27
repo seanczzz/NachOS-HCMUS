@@ -45,6 +45,39 @@ void SysPrintString(char *buffer, int length)
     kernel->synchConsoleOut->PutChar(buffer[i]);
   }
 }
+
+#define MAX_NUM_LENGTH 11
+#define INT32_MIN (-2147483647 - 1)
+
+void SysPrintNum(int num)
+{
+  char _numberBuffer[MAX_NUM_LENGTH + 2];
+  if (num == 0)
+    return kernel->synchConsoleOut->PutChar('0');
+
+  if (num == INT32_MIN)
+  {
+    kernel->synchConsoleOut->PutChar('-');
+    for (int i = 0; i < 10; ++i)
+      kernel->synchConsoleOut->PutChar("2147483648"[i]);
+    return;
+  }
+
+  if (num < 0)
+  {
+    kernel->synchConsoleOut->PutChar('-');
+    num = -num;
+  }
+  int n = 0;
+  while (num)
+  {
+    _numberBuffer[n++] = num % 10;
+    num /= 10;
+  }
+  for (int i = n - 1; i >= 0; --i)
+    kernel->synchConsoleOut->PutChar(_numberBuffer[i] + '0');
+}
+
 // Input: - User space address (int)
 // - Limit of buffer (int)
 // Output:- Buffer (char*)
