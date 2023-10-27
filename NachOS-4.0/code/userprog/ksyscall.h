@@ -12,6 +12,8 @@
 #define __USERPROG_KSYSCALL_H__
 
 #include "kernel.h"
+#include "synchconsole.h"
+#include <stdlib.h>
 
 void SysHalt()
 {
@@ -23,6 +25,26 @@ int SysAdd(int op1, int op2)
   return op1 + op2;
 }
 
+char SysReadChar() { return kernel->synchConsoleIn->GetChar(); }
+
+char *SysReadString(char *buffer, int length)
+{
+  for (int i = 0; i < length; i++)
+  {
+    buffer[i] = SysReadChar();
+  }
+  buffer[length] = '\0';
+
+  return buffer;
+}
+
+void SysPrintString(char *buffer, int length)
+{
+  for (int i = 0; i < length; i++)
+  {
+    kernel->synchConsoleOut->PutChar(buffer[i]);
+  }
+}
 // Input: - User space address (int)
 // - Limit of buffer (int)
 // Output:- Buffer (char*)

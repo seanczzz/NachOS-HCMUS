@@ -25,6 +25,9 @@
 #include "main.h"
 #include "syscall.h"
 #include "ksyscall.h"
+
+#define CONSOLE_IN 0
+#define CONSOLE_OUT 1
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -165,6 +168,12 @@ void HandleSysCall_Read()
 	int size = kernel->machine->ReadRegister(5);
 	int id = kernel->machine->ReadRegister(6);
 
+	if (id == CONSOLE_IN)
+	{
+		SysReadString(buffer, size);
+		return;
+	}
+
 	int readResult = kernel->fileSystem->Read(buffer, size, id);
 
 	if (readResult == -1)
@@ -198,6 +207,12 @@ void HandleSysCall_Write()
 	}
 	int size = kernel->machine->ReadRegister(5);
 	int id = kernel->machine->ReadRegister(6);
+
+	if (id == CONSOLE_OUT)
+	{
+		SysPrintString(buffer, size);
+		return;
+	}
 
 	int writeResult = kernel->fileSystem->Write(buffer, size, id);
 
