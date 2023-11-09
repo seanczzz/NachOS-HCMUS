@@ -101,6 +101,7 @@ public:
 
 	int Remove(char *name)
 	{
+		// cout << "Return from remove: " << fileTable->Remove(name) << endl;
 		return fileTable->Remove(name);
 	}
 

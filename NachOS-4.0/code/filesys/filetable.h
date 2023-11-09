@@ -81,7 +81,7 @@ public:
   {
     for (int i = 2; i < FILE_MAX; i++)
     {
-      if (strcmp(name, nameOpenFile[i]) == 0 && openFile[i])
+      if (openFile[i] && nameOpenFile[i] && strcmp(name, nameOpenFile[i]) == 0)
       {
         delete nameOpenFile[i];
         delete openFile[i];
@@ -90,7 +90,6 @@ public:
         return 0;
       }
     }
-
     return -1;
   }
 
