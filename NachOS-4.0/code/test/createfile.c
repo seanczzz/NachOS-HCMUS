@@ -5,10 +5,9 @@
 
 int main()
 {
-  int len;
-
+  int rm;
   /*Open a file*/
-  // int a = Open("LeHuynhCuong.txt", 0);
+  int a = Open("LeHuynhCuong.txt", 0);
   // int b = Close(2);
 
   // Write to console
@@ -23,5 +22,12 @@ int main()
   // int d = Seek(-1, a);
   // PrintNum(d);
 
+  // Remove
+  PrintNum(a);
+  PrintString("\n");
+  rm = Remove("cuong.txt");
+  PrintNum(rm);
+
+  // Segmentation fault
   Halt();
 }

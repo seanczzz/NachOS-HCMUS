@@ -99,7 +99,12 @@ public:
 		return fileTable->Seek(position, id);
 	}
 
-	bool Remove(char *name) { return Unlink(name) == 0; }
+	int Remove(char *name)
+	{
+		return fileTable->Remove(name);
+	}
+
+	// bool Remove(char *name) { return Unlink(name) == 0; }
 };
 
 #else // FILESYS

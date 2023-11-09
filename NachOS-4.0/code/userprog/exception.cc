@@ -252,6 +252,24 @@ void HandleSysCall_Seek()
 	kernel->machine->WriteRegister(2, seekResult);
 }
 
+void HandleSysCall_Remove()
+{
+	int virtAddr = kernel->machine->ReadRegister(4);
+	char *fileName = User2System(virtAddr, MaxFileLength + 1);
+	if (fileName == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG(dbgAddr, "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+		// trình người dùng
+		delete fileName;
+		return;
+	}
+
+	int removeResult = kernel->fileSystem->Remove(fileName);
+	kernel->machine->WriteRegister(2, removeResult);
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -307,6 +325,11 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Seek:
 			HandleSysCall_Seek();
+			updateProgramCounter();
+			return;
+
+		case SC_Remove:
+			HandleSysCall_Remove();
 			updateProgramCounter();
 			return;
 
