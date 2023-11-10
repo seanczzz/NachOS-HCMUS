@@ -5,7 +5,10 @@
 
 int main()
 {
-  int a, b, c, d, rm, socketId, connect1;
+  int a, b, c, d, rm,
+      socketId1, connect1, numBytesSent1;
+
+  char buffer[] = "Le Huynh Cuong";
   /*Open a file*/
   // a = Open("LeHuynhCuong.txt", 0);
   // b = Close(2);
@@ -29,12 +32,20 @@ int main()
   // PrintNum(rm);
   // PrintString("\n");
 
-  socketId = SocketTCP();
-  PrintNum(socketId);
+  // Create socket
+  socketId1 = SocketTCP();
+  PrintNum(socketId1);
   PrintString("\n");
 
-  connect1 = Connect(socketId, "127.0.0.1", 1234);
+  // Connect to server
+  connect1 = Connect(socketId1, "127.0.0.1", 1234);
   PrintNum(connect1);
   PrintString("\n");
+
+  // Send data to server
+  numBytesSent1 = Send(socketId1, buffer, 16);
+  PrintNum(numBytesSent1);
+  PrintString("\n");
+
   Halt();
 }

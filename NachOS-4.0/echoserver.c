@@ -54,7 +54,7 @@ int main(int argc, char const *argv[])
       perror("read error");
       exit(5);
     }
-    printf("received %s from client\n", buffer);
+    printf("received \"%s\" from client\n", buffer);
     if (write(clientFd, buffer, size) < 0)
     {
       perror("write error");

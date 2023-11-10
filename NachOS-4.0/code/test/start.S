@@ -42,6 +42,15 @@ __start:
  * -------------------------------------------------------------
  */
 
+
+.globl Send
+	.ent	Send
+Send:
+	addiu $2,$0,SC_Send
+	syscall
+	j	$31
+	.end Send
+
 .globl Connect
 	.ent	Connect
 Connect:

@@ -29,7 +29,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <unistd.h>
 #include <arpa/inet.h>
+#include <errno.h>
 
 #define CONSOLE_IN 0
 #define CONSOLE_OUT 1
@@ -281,6 +283,17 @@ void HandleSysCall_SocketTCP()
 	kernel->machine->WriteRegister(2, result);
 }
 
+int CanConnect(int socketid, char *ip, int port)
+{
+	struct sockaddr_in server;
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = inet_addr(ip);
+	server.sin_port = htons(port);
+	int len = sizeof(server);
+
+	return connect(socketid, (struct sockaddr *)&server, len);
+}
+
 void HandleSysCall_Connect()
 {
 	int fileId = kernel->machine->ReadRegister(4);
@@ -289,6 +302,7 @@ void HandleSysCall_Connect()
 		kernel->machine->WriteRegister(2, -1);
 		return;
 	}
+
 	int socketid = kernel->fileSystem->fileTable->socketIds[fileId];
 	if (socketid == 0)
 	{
@@ -296,9 +310,9 @@ void HandleSysCall_Connect()
 		return;
 	}
 
-	int port = kernel->machine->ReadRegister(6);
-
 	int virtAddr = kernel->machine->ReadRegister(5);
+
+	// Dia chi IP (vd : 127.127.127.127) maxlen = 3*4 + 3 = 15, them 1 null character => 16
 	char *ip = User2System(virtAddr, 16);
 	if (ip == NULL)
 	{
@@ -310,17 +324,9 @@ void HandleSysCall_Connect()
 		return;
 	}
 
-	struct sockaddr_in server;
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = inet_addr(ip);
-	server.sin_port = htons(port);
-	int len = sizeof(server);
+	int port = kernel->machine->ReadRegister(6);
 
-	printf("fileid: %d \n", fileId);
-	printf("socketid: %d \n", socketid);
-	printf("port: %d \n", port);
-	int result = connect(socketid, (struct sockaddr *)&server, len);
-	printf("result: %d \n", result);
+	int result = CanConnect(socketid, ip, port);
 
 	if (result < 0)
 	{
@@ -330,6 +336,57 @@ void HandleSysCall_Connect()
 	{
 		kernel->machine->WriteRegister(2, 0);
 	}
+	delete ip;
+}
+
+void HandleSysCall_Send()
+{
+	int fileId = kernel->machine->ReadRegister(4);
+	if (fileId < 2 || fileId >= FILE_MAX)
+	{
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+
+	int socketid = kernel->fileSystem->fileTable->socketIds[fileId];
+	if (socketid == 0)
+	{
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+
+	int len = kernel->machine->ReadRegister(6);
+
+	int virtAddr = kernel->machine->ReadRegister(5);
+	char *buffer = User2System(virtAddr, len);
+	if (buffer == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG(dbgAddr, "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+		// trình người dùng
+		delete buffer;
+		return;
+	}
+
+	int writeResult = write(socketid, buffer, strlen(buffer));
+
+	if (writeResult < 0)
+	{
+		if (errno == ECONNRESET)
+		{
+			kernel->machine->WriteRegister(2, 0);
+		}
+		else
+		{
+			kernel->machine->WriteRegister(2, -1);
+		}
+	}
+	else
+	{
+		kernel->machine->WriteRegister(2, writeResult);
+	}
+	delete buffer;
 }
 
 void ExceptionHandler(ExceptionType which)
@@ -402,6 +459,11 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Connect:
 			HandleSysCall_Connect();
+			updateProgramCounter();
+			return;
+
+		case SC_Send:
+			HandleSysCall_Send();
 			updateProgramCounter();
 			return;
 
