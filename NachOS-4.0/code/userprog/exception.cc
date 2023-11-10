@@ -26,6 +26,11 @@
 #include "syscall.h"
 #include "ksyscall.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
 #define CONSOLE_IN 0
 #define CONSOLE_OUT 1
 //----------------------------------------------------------------------
@@ -270,6 +275,10 @@ void HandleSysCall_Remove()
 	kernel->machine->WriteRegister(2, removeResult);
 }
 
+void HandleSysCall_SocketTCP()
+{
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -330,6 +339,11 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Remove:
 			HandleSysCall_Remove();
+			updateProgramCounter();
+			return;
+
+		case SC_SocketTCP:
+			HandleSysCall_SocketTCP();
 			updateProgramCounter();
 			return;
 

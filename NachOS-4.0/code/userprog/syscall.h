@@ -38,6 +38,8 @@
 #define SC_PrintString 16
 #define SC_PrintNum 17
 
+#define SC_SocketTCP 18
+
 #define SC_Add 42
 
 #ifndef IN_ASM
@@ -149,6 +151,8 @@ int Seek(int position, OpenFileId id);
  * Return 1 on success, negative error code on failure
  */
 int Close(OpenFileId id);
+
+int SocketTCP();
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program.

@@ -14,9 +14,9 @@
 class FileTable
 {
 private:
-  OpenFile **openFile;
-  char **nameOpenFile;
-  int *fileOpenMode;
+  static inline **openFile;
+  static inline char **nameOpenFile;
+  static inline int *fileOpenMode;
 
 public:
   FileTable()

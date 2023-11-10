@@ -42,6 +42,14 @@ __start:
  * -------------------------------------------------------------
  */
 
+.globl SocketTCP
+	.ent	SocketTCP
+SocketTCP:
+	addiu $2,$0,SC_SocketTCP
+	syscall
+	j	$31
+	.end SocketTCP
+
 .globl PrintNum
 	.ent	PrintNum
 PrintNum:
