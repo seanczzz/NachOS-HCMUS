@@ -29,11 +29,15 @@ int main()
   // PrintNum(rm);
   // PrintString("\n");
 
+  PrintNum(a);
+  PrintString("\n");
   socket = SocketTCP();
   PrintNum(socket);
+  PrintString("\n");
 
   socket = SocketTCP();
   PrintNum(socket);
+  PrintString("\n");
 
   Halt();
 }

@@ -17,7 +17,7 @@ private:
   OpenFile **openFile;
   char **nameOpenFile;
   int *fileOpenMode;
-  int *socketId;
+  int socketIds[FILE_MAX];
 
 public:
   FileTable()
@@ -29,10 +29,10 @@ public:
     fileOpenMode[CONSOLE_IN] = MODE_READ;
     fileOpenMode[CONSOLE_OUT] = MODE_WRITE;
 
-    socketId = new int[FILE_MAX];
+    // socketIds = new int[FILE_MAX];
     for (int i = 2; i < FILE_MAX; i++)
     {
-      socketId[i] = 0;
+      socketIds[i] = 0;
     }
   }
 
@@ -140,9 +140,10 @@ public:
   {
     int sockId = OpenSocket();
     int freeIndex = -1;
+
     for (int i = 2; i < FILE_MAX; i++)
     {
-      if (openFile[i] == NULL)
+      if (openFile[i] == NULL && socketIds[i] == 0)
       {
         freeIndex = i;
         break;
@@ -154,8 +155,7 @@ public:
       return -1;
     }
 
-    printf("free index: %d \n", freeIndex);
-    // socketId[freeIndex] = sockId;
+    socketIds[freeIndex] = sockId;
     return freeIndex;
   }
 
@@ -171,7 +171,7 @@ public:
     }
     delete[] openFile;
     delete[] nameOpenFile;
-    delete[] socketId;
+    // delete[] socketIds;
     delete[] fileOpenMode;
   }
 };

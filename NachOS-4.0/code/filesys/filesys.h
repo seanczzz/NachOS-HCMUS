@@ -50,7 +50,7 @@ public:
 	FileTable *fileTable;
 	FileSystem()
 	{
-		fileTable = new FileTable;
+		fileTable = new FileTable();
 	}
 
 	~FileSystem()
