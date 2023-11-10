@@ -14,9 +14,10 @@
 class FileTable
 {
 private:
-  static inline **openFile;
-  static inline char **nameOpenFile;
-  static inline int *fileOpenMode;
+  OpenFile **openFile;
+  char **nameOpenFile;
+  int *fileOpenMode;
+  int *socketId;
 
 public:
   FileTable()
@@ -27,6 +28,12 @@ public:
     fileOpenMode = new int[FILE_MAX];
     fileOpenMode[CONSOLE_IN] = MODE_READ;
     fileOpenMode[CONSOLE_OUT] = MODE_WRITE;
+
+    socketId = new int[FILE_MAX];
+    for (int i = 2; i < FILE_MAX; i++)
+    {
+      socketId[i] = 0;
+    }
   }
 
   int Insert(char *fileName, int openMode)
@@ -129,14 +136,42 @@ public:
     return openFile[index]->Seek(pos);
   }
 
+  int CreateSocket()
+  {
+    int sockId = OpenSocket();
+    int freeIndex = -1;
+    for (int i = 2; i < FILE_MAX; i++)
+    {
+      if (openFile[i] == NULL)
+      {
+        freeIndex = i;
+        break;
+      }
+    }
+
+    if (freeIndex == -1)
+    {
+      return -1;
+    }
+
+    printf("free index: %d \n", freeIndex);
+    // socketId[freeIndex] = sockId;
+    return freeIndex;
+  }
+
   ~FileTable()
   {
     for (int i = 0; i < FILE_MAX; i++)
     {
       if (openFile[i])
         delete openFile[i];
+
+      if (nameOpenFile[i])
+        delete nameOpenFile[i];
     }
     delete[] openFile;
+    delete[] nameOpenFile;
+    delete[] socketId;
     delete[] fileOpenMode;
   }
 };

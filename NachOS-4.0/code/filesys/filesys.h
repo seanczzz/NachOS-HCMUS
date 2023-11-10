@@ -105,6 +105,10 @@ public:
 		return fileTable->Remove(name);
 	}
 
+	int SocketTCP()
+	{
+		return fileTable->CreateSocket();
+	}
 	// bool Remove(char *name) { return Unlink(name) == 0; }
 };
 

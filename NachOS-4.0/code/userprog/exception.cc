@@ -277,6 +277,9 @@ void HandleSysCall_Remove()
 
 void HandleSysCall_SocketTCP()
 {
+	int haha = 1;
+	int result = kernel->fileSystem->SocketTCP();
+	kernel->machine->WriteRegister(2, result);
 }
 
 void ExceptionHandler(ExceptionType which)

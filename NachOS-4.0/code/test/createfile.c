@@ -5,7 +5,7 @@
 
 int main()
 {
-  int a, b, c, d, rm;
+  int a, b, c, d, rm, socket;
   /*Open a file*/
   a = Open("LeHuynhCuong.txt", 0);
   // b = Close(2);
@@ -23,10 +23,17 @@ int main()
   // PrintNum(d);
 
   // Remove
-  PrintNum(a);
-  PrintString("\n");
-  rm = Remove("LeHuynhCuong.txt");
-  PrintNum(rm);
+  // PrintNum(a);
+  // PrintString("\n");
+  // rm = Remove("LeHuynhCuong.txt");
+  // PrintNum(rm);
+  // PrintString("\n");
+
+  socket = SocketTCP();
+  PrintNum(socket);
+
+  socket = SocketTCP();
+  PrintNum(socket);
 
   Halt();
 }
