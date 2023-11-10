@@ -39,6 +39,7 @@
 #define SC_PrintNum 17
 
 #define SC_SocketTCP 18
+#define SC_Connect 19
 
 #define SC_Add 42
 
@@ -153,6 +154,8 @@ int Seek(int position, OpenFileId id);
 int Close(OpenFileId id);
 
 int SocketTCP();
+
+int Connect(int socketid, char *ip, int port);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program.

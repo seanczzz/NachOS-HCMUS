@@ -4,6 +4,11 @@
 #include "sysdep.h"
 #include "filetable.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
 #define FILE_MAX 20
 #define CONSOLE_IN 0
 #define CONSOLE_OUT 1
@@ -17,6 +22,8 @@ private:
   OpenFile **openFile;
   char **nameOpenFile;
   int *fileOpenMode;
+
+public:
   int socketIds[FILE_MAX];
 
 public:
@@ -138,7 +145,11 @@ public:
 
   int CreateSocket()
   {
-    int sockId = OpenSocket();
+    // int sockId = OpenSocket();
+    int sockId = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockId < 0)
+      return -1;
+
     int freeIndex = -1;
 
     for (int i = 2; i < FILE_MAX; i++)

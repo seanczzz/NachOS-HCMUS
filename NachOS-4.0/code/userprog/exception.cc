@@ -277,9 +277,59 @@ void HandleSysCall_Remove()
 
 void HandleSysCall_SocketTCP()
 {
-	// int haha1 = 1;
 	int result = kernel->fileSystem->SocketTCP();
 	kernel->machine->WriteRegister(2, result);
+}
+
+void HandleSysCall_Connect()
+{
+	int fileId = kernel->machine->ReadRegister(4);
+	if (fileId < 2 || fileId >= FILE_MAX)
+	{
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	int socketid = kernel->fileSystem->fileTable->socketIds[fileId];
+	if (socketid == 0)
+	{
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+
+	int port = kernel->machine->ReadRegister(6);
+
+	int virtAddr = kernel->machine->ReadRegister(5);
+	char *ip = User2System(virtAddr, 16);
+	if (ip == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG(dbgAddr, "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+		// trình người dùng
+		delete ip;
+		return;
+	}
+
+	struct sockaddr_in server;
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = inet_addr(ip);
+	server.sin_port = htons(port);
+	int len = sizeof(server);
+
+	printf("fileid: %d \n", fileId);
+	printf("socketid: %d \n", socketid);
+	printf("port: %d \n", port);
+	int result = connect(socketid, (struct sockaddr *)&server, len);
+	printf("result: %d \n", result);
+
+	if (result < 0)
+	{
+		kernel->machine->WriteRegister(2, -1);
+	}
+	else
+	{
+		kernel->machine->WriteRegister(2, 0);
+	}
 }
 
 void ExceptionHandler(ExceptionType which)
@@ -347,6 +397,11 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_SocketTCP:
 			HandleSysCall_SocketTCP();
+			updateProgramCounter();
+			return;
+
+		case SC_Connect:
+			HandleSysCall_Connect();
 			updateProgramCounter();
 			return;
 

@@ -5,9 +5,9 @@
 
 int main()
 {
-  int a, b, c, d, rm, socket;
+  int a, b, c, d, rm, socketId, connect1;
   /*Open a file*/
-  a = Open("LeHuynhCuong.txt", 0);
+  // a = Open("LeHuynhCuong.txt", 0);
   // b = Close(2);
 
   // Write to console
@@ -29,15 +29,12 @@ int main()
   // PrintNum(rm);
   // PrintString("\n");
 
-  PrintNum(a);
-  PrintString("\n");
-  socket = SocketTCP();
-  PrintNum(socket);
+  socketId = SocketTCP();
+  PrintNum(socketId);
   PrintString("\n");
 
-  socket = SocketTCP();
-  PrintNum(socket);
+  connect1 = Connect(socketId, "127.0.0.1", 1234);
+  PrintNum(connect1);
   PrintString("\n");
-
   Halt();
 }

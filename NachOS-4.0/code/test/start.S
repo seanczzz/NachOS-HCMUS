@@ -42,6 +42,14 @@ __start:
  * -------------------------------------------------------------
  */
 
+.globl Connect
+	.ent	Connect
+Connect:
+	addiu $2,$0,SC_Connect
+	syscall
+	j	$31
+	.end Connect
+
 .globl SocketTCP
 	.ent	SocketTCP
 SocketTCP:

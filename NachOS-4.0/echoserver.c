@@ -63,5 +63,6 @@ int main(int argc, char const *argv[])
     close(clientFd);
   }
   close(serverFd);
+
   return 0;
 }
