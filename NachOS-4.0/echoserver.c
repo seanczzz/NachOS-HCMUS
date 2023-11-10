@@ -12,6 +12,7 @@ int main(int argc, char const *argv[])
   int len;
   int port = 1234;
   char buffer[1024];
+
   if (argc == 2)
   {
     port = atoi(argv[1]);
@@ -55,6 +56,15 @@ int main(int argc, char const *argv[])
       exit(5);
     }
     printf("received \"%s\" from client\n", buffer);
+
+    int i;
+    for (i = 0; i < strlen(buffer); i++)
+    {
+      if (buffer[i] >= 'a' && buffer[i] <= 'z')
+      {
+        buffer[i] -= 32;
+      }
+    }
     if (write(clientFd, buffer, size) < 0)
     {
       perror("write error");

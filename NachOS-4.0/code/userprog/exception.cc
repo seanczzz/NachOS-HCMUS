@@ -206,6 +206,7 @@ void HandleSysCall_Read()
 	{
 		DEBUG(dbgSys, "Succeed in reading file\n");
 	}
+	System2User(virtAddr, sizeof(buffer), buffer);
 	kernel->machine->WriteRegister(2, readResult);
 	delete buffer;
 }
@@ -389,6 +390,58 @@ void HandleSysCall_Send()
 	delete buffer;
 }
 
+void HandleSysCall_Receive()
+{
+	int fileId = kernel->machine->ReadRegister(4);
+	if (fileId < 2 || fileId >= FILE_MAX)
+	{
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+
+	int socketid = kernel->fileSystem->fileTable->socketIds[fileId];
+	if (socketid == 0)
+	{
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+
+	int len = kernel->machine->ReadRegister(6);
+
+	int virtAddr = kernel->machine->ReadRegister(5);
+	char *buffer = User2System(virtAddr, len);
+	if (buffer == NULL)
+	{
+		printf("\n Not enough memory in system");
+		DEBUG(dbgAddr, "\n Not enough memory in system");
+		kernel->machine->WriteRegister(2, -1); // trả về lỗi cho chương
+		// trình người dùng
+		delete buffer;
+		return;
+	}
+
+	int readResult = read(socketid, buffer, len);
+
+	if (readResult < 0)
+	{
+		if (errno == ECONNRESET)
+		{
+			kernel->machine->WriteRegister(2, 0);
+		}
+		else
+		{
+			kernel->machine->WriteRegister(2, -1);
+		}
+	}
+	else
+	{
+		System2User(virtAddr, len, buffer);
+		kernel->machine->WriteRegister(2, readResult);
+		// kernel->machine->WriteRegister(2, readResult);
+	}
+	// delete buffer;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -464,6 +517,11 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Send:
 			HandleSysCall_Send();
+			updateProgramCounter();
+			return;
+
+		case SC_Receive:
+			HandleSysCall_Receive();
 			updateProgramCounter();
 			return;
 

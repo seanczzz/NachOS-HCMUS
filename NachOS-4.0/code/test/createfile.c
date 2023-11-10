@@ -6,9 +6,9 @@
 int main()
 {
   int a, b, c, d, rm,
-      socketId1, connect1, numBytesSent1;
+      socketId1, connect1, numBytesSent1, numBytesRecv1;
 
-  char buffer[] = "Le Huynh Cuong";
+  char buffer[50];
   /*Open a file*/
   // a = Open("LeHuynhCuong.txt", 0);
   // b = Close(2);
@@ -43,8 +43,15 @@ int main()
   PrintString("\n");
 
   // Send data to server
-  numBytesSent1 = Send(socketId1, buffer, 16);
+  numBytesSent1 = Send(socketId1, "Le Huynh Cuong", 16);
   PrintNum(numBytesSent1);
+  PrintString("\n");
+
+  // Receive data from server
+  numBytesRecv1 = Receive(socketId1, buffer, 25);
+  PrintNum(numBytesRecv1);
+  PrintString("\n Receiving from server: ");
+  PrintString(buffer);
   PrintString("\n");
 
   Halt();

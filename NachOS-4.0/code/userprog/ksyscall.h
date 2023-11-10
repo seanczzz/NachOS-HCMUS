@@ -119,7 +119,7 @@ int System2User(int virtAddr, int len, char *buffer)
   do
   {
     oneChar = (int)buffer[i];
-    kernel->machine->WriteMem(virtAddr + i, 1, oneChar);
+    kernel->machine->WriteMem(virtAddr + i, 1, buffer[i]);
     i++;
   } while (i < len && oneChar != 0);
   return i;
