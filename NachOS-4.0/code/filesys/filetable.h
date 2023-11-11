@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 #define FILE_MAX 20
@@ -84,6 +85,13 @@ public:
 
   int Remove(int index)
   {
+    if (fileItem[index].socketId != 0)
+    {
+      int closeSocketRes = close(fileItem[index].socketId) >= 0 ? 0 : -1;
+      fileItem[index].socketId = 0;
+      return closeSocketRes;
+    }
+
     if (index < 2 || index >= FILE_MAX)
       return -1;
     if (fileItem[index].openFile)

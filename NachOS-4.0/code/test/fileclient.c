@@ -5,7 +5,7 @@ int main()
 {
 
   // file input: Hello.txt, file output: output.txt
-  int inputFileId, outputFileId, socketId;
+  int inputFileId, outputFileId, socketId, closeSocket;
   char buffer[50];
 
   inputFileId = Open("Hello.txt", 0);
@@ -22,6 +22,11 @@ int main()
   Create("output.txt");
   outputFileId = Open("output.txt", 0);
   Write(buffer, 49, outputFileId);
+
+  // closeSocket = Close(socketId);
+  // PrintString("Close: ");
+  // PrintNum(closeSocket);
+  // PrintString("\n");
 
   Halt();
 }
