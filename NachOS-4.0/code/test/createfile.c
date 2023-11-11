@@ -11,11 +11,11 @@ int main()
   // int numClient = 4, count = 0;
   // char *messages[4] = {"Le Huynh Cuong", "Nguyen Tan Hung", "Tran Minh Quang", "do an NachOS he dieu hanh"};
   // char buffer[50];
-  char buffer[] = "I am working on NachOS project\n"; // only for write to console or file
+  // char buffer[] = "I am working on NachOS project\n"; // only for write to console or file
 
   // /*Create and Open a file*/
   // createRes = Create("HuynhCuong.txt");
-  // a = Open("HuynhCuong.txt", 0);
+  // a = Open("Hello.txt", 0);
   // b = Close(a);
   // PrintNum(b);
   // PrintString("\n");
@@ -26,10 +26,10 @@ int main()
   // // Write to file
   // c = Write(buffer, 50, a);
 
-  // Read from console
-  c = Read(buffer, 49, 0);
-  PrintString("Chuoi doc duoc tu console: ");
-  PrintString(buffer);
+  // // Read from console
+  // c = Read(buffer, 49, 0);
+  // PrintString("Chuoi doc duoc tu console: ");
+  // PrintString(buffer);
 
   // // Read from file
   // c = Read(buffer, 49, a);
@@ -37,14 +37,13 @@ int main()
   // PrintString(buffer);
   // PrintString("\n");
 
-  // Seek
+  // // Seek
   // d = Seek(-1, a);
   // PrintNum(d);
 
   // Remove
-  // PrintNum(a);
-  // PrintString("\n");
-  // rm = Remove("HuynhCuong.txt");
+  // a = Open("a.txt", 0);
+  // rm = Remove("a.txt");
   // PrintNum(rm);
   // PrintString("\n");
 

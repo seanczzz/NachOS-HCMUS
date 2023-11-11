@@ -21,24 +21,26 @@ struct FileItem
   OpenFile *openFile;
   char *nameOpenFile;
   int socketId;
-  int fileOpenMode;
 };
 
 class FileTable
 {
 private:
   FileItem fileItem[FILE_MAX];
+  int *fileOpenMode;
 
 public:
   FileTable()
   {
-    fileItem[CONSOLE_IN].fileOpenMode = MODE_READ;
-    fileItem[CONSOLE_OUT].fileOpenMode = MODE_WRITE;
+    fileOpenMode = new int[FILE_MAX];
+    fileOpenMode[CONSOLE_IN] = MODE_READ;
+    fileOpenMode[CONSOLE_OUT] = MODE_WRITE;
 
     for (int i = 2; i < FILE_MAX; i++)
     {
       fileItem[i].socketId = 0;
       fileItem[i].openFile = NULL;
+      fileItem[i].nameOpenFile = NULL;
     }
   }
 
@@ -74,7 +76,7 @@ public:
       return -1;
 
     fileItem[freeIndex].openFile = new OpenFile(fileDescriptor);
-    fileItem[freeIndex].fileOpenMode = openMode;
+    fileOpenMode[freeIndex] = openMode;
     fileItem[freeIndex].nameOpenFile = strdup(fileName);
 
     return freeIndex;
@@ -100,7 +102,7 @@ public:
   {
     for (int i = 2; i < FILE_MAX; i++)
     {
-      if (fileItem[i].openFile && fileItem[i].nameOpenFile && strcmp(name, fileItem[i].nameOpenFile) == 0)
+      if (fileItem[i].openFile != NULL && fileItem[i].nameOpenFile != NULL && strcmp(name, fileItem[i].nameOpenFile) == 0)
       {
         delete fileItem[i].nameOpenFile;
         delete fileItem[i].openFile;
@@ -129,7 +131,7 @@ public:
   {
     if (index >= FILE_MAX)
       return -1;
-    if (fileItem[index].openFile == NULL || fileItem[index].fileOpenMode == MODE_READ)
+    if (fileItem[index].openFile == NULL || fileOpenMode[index] == MODE_READ)
       return -1;
     return fileItem[index].openFile->Write(buffer, charCount);
   }
@@ -185,6 +187,8 @@ public:
       if (fileItem[i].nameOpenFile)
         delete fileItem[i].nameOpenFile;
     }
+
+    delete[] fileOpenMode;
   }
 };
 

@@ -103,7 +103,10 @@ public:
 	{
 		// cout << "Return from remove: " << fileTable->Remove(name) << endl;
 		int result = fileTable->Remove(name);
-		Unlink(name);
+		if (result == 0)
+		{
+			Unlink(name);
+		}
 		return result;
 	}
 
