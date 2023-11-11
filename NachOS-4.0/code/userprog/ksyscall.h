@@ -34,7 +34,7 @@ char *SysReadString(char *buffer, int length)
     buffer[i] = SysReadChar();
     if (buffer[i] == '\n')
     {
-      buffer[i] == '\0';
+      buffer[i] = '\0';
       return buffer;
     }
   }
