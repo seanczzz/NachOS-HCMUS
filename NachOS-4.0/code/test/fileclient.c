@@ -1,16 +1,12 @@
 #include "syscall.h"
 #include "copyright.h"
 
-int main(int argc, char *argv[])
+int main()
 {
+
   // file input: Hello.txt, file output: output.txt
   int inputFileId, outputFileId, socketId;
   char buffer[50];
-
-  // PrintNum(argc);
-  // PrintString("\n");
-  // PrintString(argv[1]);
-  // PrintString(argv[2]);
 
   inputFileId = Open("Hello.txt", 0);
   Read(buffer, 49, inputFileId);

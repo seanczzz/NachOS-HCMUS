@@ -305,7 +305,7 @@ void HandleSysCall_Connect()
 		return;
 	}
 
-	int socketid = kernel->fileSystem->fileTable->socketIds[fileId];
+	int socketid = kernel->fileSystem->fileTable->getSocketIdAt(fileId);
 	if (socketid == 0)
 	{
 		kernel->machine->WriteRegister(2, -1);
@@ -350,7 +350,7 @@ void HandleSysCall_Send()
 		return;
 	}
 
-	int socketid = kernel->fileSystem->fileTable->socketIds[fileId];
+	int socketid = kernel->fileSystem->fileTable->getSocketIdAt(fileId);
 	if (socketid == 0)
 	{
 		kernel->machine->WriteRegister(2, -1);
@@ -400,7 +400,7 @@ void HandleSysCall_Receive()
 		return;
 	}
 
-	int socketid = kernel->fileSystem->fileTable->socketIds[fileId];
+	int socketid = kernel->fileSystem->fileTable->getSocketIdAt(fileId);
 	if (socketid == 0)
 	{
 		kernel->machine->WriteRegister(2, -1);

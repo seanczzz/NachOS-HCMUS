@@ -16,31 +16,35 @@
 #define MODE_READ 1
 #define MODE_WRITE 2
 
+struct FileItem
+{
+  OpenFile *openFile;
+  char *nameOpenFile;
+  int socketId;
+  int fileOpenMode;
+};
+
 class FileTable
 {
 private:
-  OpenFile **openFile;
-  char **nameOpenFile;
-  int *fileOpenMode;
-
-public:
-  int socketIds[FILE_MAX];
+  FileItem fileItem[FILE_MAX];
 
 public:
   FileTable()
   {
-    openFile = new OpenFile *[FILE_MAX];
-    nameOpenFile = new char *[FILE_MAX];
+    fileItem[CONSOLE_IN].fileOpenMode = MODE_READ;
+    fileItem[CONSOLE_OUT].fileOpenMode = MODE_WRITE;
 
-    fileOpenMode = new int[FILE_MAX];
-    fileOpenMode[CONSOLE_IN] = MODE_READ;
-    fileOpenMode[CONSOLE_OUT] = MODE_WRITE;
-
-    // socketIds = new int[FILE_MAX];
     for (int i = 2; i < FILE_MAX; i++)
     {
-      socketIds[i] = 0;
+      fileItem[i].socketId = 0;
+      fileItem[i].openFile = NULL;
     }
+  }
+
+  int getSocketIdAt(int fileId)
+  {
+    return fileItem[fileId].socketId;
   }
 
   int Insert(char *fileName, int openMode)
@@ -49,7 +53,7 @@ public:
     int fileDescriptor = -1;
     for (int i = 2; i < FILE_MAX; i++)
     {
-      if (openFile[i] == NULL)
+      if (fileItem[i].openFile == NULL)
       {
         freeIndex = i;
         break;
@@ -69,9 +73,9 @@ public:
     if (fileDescriptor == -1)
       return -1;
 
-    openFile[freeIndex] = new OpenFile(fileDescriptor);
-    fileOpenMode[freeIndex] = openMode;
-    nameOpenFile[freeIndex] = strdup(fileName);
+    fileItem[freeIndex].openFile = new OpenFile(fileDescriptor);
+    fileItem[freeIndex].fileOpenMode = openMode;
+    fileItem[freeIndex].nameOpenFile = strdup(fileName);
 
     return freeIndex;
   }
@@ -80,12 +84,13 @@ public:
   {
     if (index < 2 || index >= FILE_MAX)
       return -1;
-    if (openFile[index])
+    if (fileItem[index].openFile)
     {
-      delete openFile[index];
-      delete nameOpenFile[index];
-      openFile[index] = NULL;
-      nameOpenFile[index] = NULL;
+      delete fileItem[index].openFile;
+      delete fileItem[index].nameOpenFile;
+
+      fileItem[index].openFile = NULL;
+      fileItem[index].nameOpenFile = NULL;
       return 0;
     }
     return -1;
@@ -95,12 +100,12 @@ public:
   {
     for (int i = 2; i < FILE_MAX; i++)
     {
-      if (openFile[i] && nameOpenFile[i] && strcmp(name, nameOpenFile[i]) == 0)
+      if (fileItem[i].openFile && fileItem[i].nameOpenFile && strcmp(name, fileItem[i].nameOpenFile) == 0)
       {
-        delete nameOpenFile[i];
-        delete openFile[i];
-        nameOpenFile[i] = NULL;
-        openFile[i] = NULL;
+        delete fileItem[i].nameOpenFile;
+        delete fileItem[i].openFile;
+        fileItem[i].nameOpenFile = NULL;
+        fileItem[i].openFile = NULL;
         return 0;
       }
     }
@@ -111,9 +116,9 @@ public:
   {
     if (index >= FILE_MAX)
       return -1;
-    if (openFile[index] == NULL)
+    if (fileItem[index].openFile == NULL)
       return -1;
-    int result = openFile[index]->Read(buffer, charCount);
+    int result = fileItem[index].openFile->Read(buffer, charCount);
     // if we cannot read enough bytes, we should return -2
     // if (result != charCount)
     //   return -2;
@@ -124,23 +129,23 @@ public:
   {
     if (index >= FILE_MAX)
       return -1;
-    if (openFile[index] == NULL || fileOpenMode[index] == MODE_READ)
+    if (fileItem[index].openFile == NULL || fileItem[index].fileOpenMode == MODE_READ)
       return -1;
-    return openFile[index]->Write(buffer, charCount);
+    return fileItem[index].openFile->Write(buffer, charCount);
   }
 
   int Seek(int pos, int index)
   {
     if (index <= 1 || index >= FILE_MAX)
       return -1;
-    if (openFile[index] == NULL)
+    if (fileItem[index].openFile == NULL)
       return -1;
     // use seek(-1) to move to the end of file
     if (pos == -1)
-      pos = openFile[index]->Length();
-    if (pos < 0 || pos > openFile[index]->Length())
+      pos = fileItem[index].openFile->Length();
+    if (pos < 0 || pos > fileItem[index].openFile->Length())
       return -1;
-    return openFile[index]->Seek(pos);
+    return fileItem[index].openFile->Seek(pos);
   }
 
   int CreateSocket()
@@ -154,7 +159,7 @@ public:
 
     for (int i = 2; i < FILE_MAX; i++)
     {
-      if (openFile[i] == NULL && socketIds[i] == 0)
+      if (fileItem[i].openFile == NULL && fileItem[i].socketId == 0)
       {
         freeIndex = i;
         break;
@@ -166,7 +171,7 @@ public:
       return -1;
     }
 
-    socketIds[freeIndex] = sockId;
+    fileItem[freeIndex].socketId = sockId;
     return freeIndex;
   }
 
@@ -174,16 +179,12 @@ public:
   {
     for (int i = 0; i < FILE_MAX; i++)
     {
-      if (openFile[i])
-        delete openFile[i];
+      if (fileItem[i].openFile)
+        delete fileItem[i].openFile;
 
-      if (nameOpenFile[i])
-        delete nameOpenFile[i];
+      if (fileItem[i].nameOpenFile)
+        delete fileItem[i].nameOpenFile;
     }
-    delete[] openFile;
-    delete[] nameOpenFile;
-    // delete[] socketIds;
-    delete[] fileOpenMode;
   }
 };
 
