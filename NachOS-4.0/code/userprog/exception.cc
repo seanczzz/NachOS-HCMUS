@@ -193,6 +193,7 @@ void HandleSysCall_Read()
 	if (id == CONSOLE_IN)
 	{
 		SysReadString(buffer, size);
+		System2User(virtAddr, strlen(buffer), buffer);
 		return;
 	}
 
@@ -206,7 +207,7 @@ void HandleSysCall_Read()
 	{
 		DEBUG(dbgSys, "Succeed in reading file\n");
 	}
-	System2User(virtAddr, sizeof(buffer), buffer);
+	System2User(virtAddr, strlen(buffer), buffer);
 	kernel->machine->WriteRegister(2, readResult);
 	delete buffer;
 }

@@ -164,8 +164,6 @@ int Send(int socketid, char *buffer, int len);
 
 int Receive(int socketid, char *buffer, int len);
 
-int Close(int socketid);
-
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program.
  *

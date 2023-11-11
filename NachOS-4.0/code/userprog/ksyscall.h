@@ -32,6 +32,11 @@ char *SysReadString(char *buffer, int length)
   for (int i = 0; i < length; i++)
   {
     buffer[i] = SysReadChar();
+    if (buffer[i] == '\n')
+    {
+      buffer[i] == '\0';
+      return buffer;
+    }
   }
   buffer[length] = '\0';
 
