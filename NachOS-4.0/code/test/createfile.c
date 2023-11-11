@@ -10,8 +10,8 @@ int main()
 
   char buffer[50];
   /*Open a file*/
-  // a = Open("LeHuynhCuong.txt", 0);
-  // b = Close(2);
+  a = Open("LeHuynhCuong.txt", 0);
+  // b = Close(a);
 
   // Write to console
   // char buffer[] = "I am working on NachOS project\n";
@@ -28,9 +28,9 @@ int main()
   // Remove
   // PrintNum(a);
   // PrintString("\n");
-  // rm = Remove("LeHuynhCuong.txt");
-  // PrintNum(rm);
-  // PrintString("\n");
+  rm = Remove("LeHuynhCuong.txt");
+  PrintNum(rm);
+  PrintString("\n");
 
   // Create socket
   socketId1 = SocketTCP();

@@ -4,6 +4,18 @@
 #include <arpa/inet.h> // sockaddr_in, AF_INET, SOCK_STREAM, INADDR_ANY, socket etc...
 #include <string.h>    // memset
 
+void toUpperCaseString(char *myStr)
+{
+  int i;
+  for (i = 0; i < strlen(myStr); i++)
+  {
+    if (myStr[i] >= 'a' && myStr[i] <= 'z')
+    {
+      myStr[i] -= 32;
+    }
+  }
+}
+
 int main(int argc, char const *argv[])
 {
 
@@ -57,14 +69,7 @@ int main(int argc, char const *argv[])
     }
     printf("received \"%s\" from client\n", buffer);
 
-    int i;
-    for (i = 0; i < strlen(buffer); i++)
-    {
-      if (buffer[i] >= 'a' && buffer[i] <= 'z')
-      {
-        buffer[i] -= 32;
-      }
-    }
+    toUpperCaseString(buffer);
     if (write(clientFd, buffer, size) < 0)
     {
       perror("write error");

@@ -42,6 +42,7 @@
 #define SC_Connect 19
 #define SC_Send 20
 #define SC_Receive 21
+// #define SC_CloseSocket 22
 
 #define SC_Add 42
 
@@ -162,6 +163,8 @@ int Connect(int socketid, char *ip, int port);
 int Send(int socketid, char *buffer, int len);
 
 int Receive(int socketid, char *buffer, int len);
+
+int Close(int socketid);
 
 /* User-level thread operations: Fork and Yield.  To allow multiple
  * threads to run within a user program.
