@@ -177,7 +177,8 @@ void HandleSysCall_Read()
 	DEBUG(dbgAddr, "\n SC_Read call ...");
 	DEBUG(dbgAddr, "\n Reading virtual address of buffer");
 	virtAddr = kernel->machine->ReadRegister(4);
-	buffer = User2System(virtAddr, MaxFileLength + 1);
+	int size = kernel->machine->ReadRegister(5);
+	buffer = User2System(virtAddr, size + 1);
 	if (buffer == NULL)
 	{
 		printf("\n Not enough memory in system");
@@ -187,13 +188,13 @@ void HandleSysCall_Read()
 		delete buffer;
 		return;
 	}
-	int size = kernel->machine->ReadRegister(5);
 	int id = kernel->machine->ReadRegister(6);
 
 	if (id == CONSOLE_IN)
 	{
-		SysReadString(buffer, size);
-		System2User(virtAddr, strlen(buffer), buffer);
+		int sl = SysReadString(buffer, size);
+		System2User(virtAddr, size + 1, buffer);
+		kernel->machine->WriteRegister(2, sl);
 		return;
 	}
 
@@ -219,7 +220,8 @@ void HandleSysCall_Write()
 	DEBUG(dbgAddr, "\n SC_Write call ...");
 	DEBUG(dbgAddr, "\n Writing virtual address of buffer");
 	virtAddr = kernel->machine->ReadRegister(4);
-	buffer = User2System(virtAddr, MaxFileLength + 1);
+	int size = kernel->machine->ReadRegister(5);
+	buffer = User2System(virtAddr, size + 1);
 	if (buffer == NULL)
 	{
 		printf("\n Not enough memory in system");
@@ -229,12 +231,12 @@ void HandleSysCall_Write()
 		delete buffer;
 		return;
 	}
-	int size = kernel->machine->ReadRegister(5);
 	int id = kernel->machine->ReadRegister(6);
 
 	if (id == CONSOLE_OUT)
 	{
-		SysPrintString(buffer, size);
+		int sl = SysPrintString(buffer, size);
+		kernel->machine->WriteRegister(2, sl);
 		return;
 	}
 

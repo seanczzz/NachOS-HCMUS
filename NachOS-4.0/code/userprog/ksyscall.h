@@ -27,7 +27,7 @@ int SysAdd(int op1, int op2)
 
 char SysReadChar() { return kernel->synchConsoleIn->GetChar(); }
 
-char *SysReadString(char *buffer, int length)
+int SysReadString(char *buffer, int length)
 {
   for (int i = 0; i < length; i++)
   {
@@ -35,20 +35,25 @@ char *SysReadString(char *buffer, int length)
     if (buffer[i] == '\n')
     {
       buffer[i] = '\0';
-      return buffer;
+      return i;
     }
   }
   buffer[length] = '\0';
 
-  return buffer;
+  return length;
 }
 
-void SysPrintString(char *buffer, int length)
+int SysPrintString(char *buffer, int length)
 {
   for (int i = 0; i < length; i++)
   {
+    if (buffer[i] == '\0')
+    {
+      return i;
+    }
     kernel->synchConsoleOut->PutChar(buffer[i]);
   }
+  return length;
 }
 
 #define MAX_NUM_LENGTH 11
