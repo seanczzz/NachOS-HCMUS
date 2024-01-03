@@ -5,9 +5,11 @@
 
 int main()
 {
-  int newProc1;
+  int newProc1, exitCode1;
   newProc1 = Exec("cat"); // Project 01
 
-  PrintNum(newProc1);
+  exitCode1 = Join(newProc1);
+
+  Exit(exitCode1);
   Halt();
 }

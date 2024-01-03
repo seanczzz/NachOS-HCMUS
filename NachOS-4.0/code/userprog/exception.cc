@@ -463,6 +463,18 @@ void HandleSysCall_Exec()
 	return;
 }
 
+void HandleSysCall_Join()
+{
+	int id = kernel->machine->ReadRegister(4);
+	kernel->machine->WriteRegister(2, SysJoin(id));
+}
+
+void HandleSysCall_Exit()
+{
+	int id = kernel->machine->ReadRegister(4);
+	kernel->machine->WriteRegister(2, SysExit(id));
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -580,6 +592,15 @@ void ExceptionHandler(ExceptionType which)
 
 		case SC_Exec:
 			HandleSysCall_Exec();
+			updateProgramCounter();
+			return;
+
+		case SC_Join:
+			HandleSysCall_Join();
+			updateProgramCounter();
+			return;
+		case SC_Exit:
+			HandleSysCall_Exit();
 			updateProgramCounter();
 			return;
 

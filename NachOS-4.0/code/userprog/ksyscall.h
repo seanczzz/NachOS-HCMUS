@@ -151,6 +151,10 @@ int SysExec(char *name)
   return kernel->pTab->ExecUpdate(name);
 }
 
+int SysJoin(int id) { return kernel->pTab->JoinUpdate(id); }
+
+int SysExit(int id) { return kernel->pTab->ExitUpdate(id); }
+
 int SysGetPid() { return kernel->currentThread->processID; }
 
 #endif /* ! __USERPROG_KSYSCALL_H__ */
