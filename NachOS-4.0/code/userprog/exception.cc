@@ -307,7 +307,7 @@ void HandleSysCall_Connect()
 		return;
 	}
 
-	int socketid = kernel->fileSystem->fileTable->getSocketIdAt(fileId);
+	int socketid = kernel->fileSystem->fileTable[kernel->currentThread->processID]->getSocketIdAt(fileId);
 	if (socketid == 0)
 	{
 		kernel->machine->WriteRegister(2, -1);
@@ -352,7 +352,7 @@ void HandleSysCall_Send()
 		return;
 	}
 
-	int socketid = kernel->fileSystem->fileTable->getSocketIdAt(fileId);
+	int socketid = kernel->fileSystem->fileTable[kernel->currentThread->processID]->getSocketIdAt(fileId);
 	if (socketid == 0)
 	{
 		kernel->machine->WriteRegister(2, -1);
@@ -402,7 +402,7 @@ void HandleSysCall_Receive()
 		return;
 	}
 
-	int socketid = kernel->fileSystem->fileTable->getSocketIdAt(fileId);
+	int socketid = kernel->fileSystem->fileTable[kernel->currentThread->processID]->getSocketIdAt(fileId);
 	if (socketid == 0)
 	{
 		kernel->machine->WriteRegister(2, -1);
@@ -445,14 +445,47 @@ void HandleSysCall_Receive()
 	// delete buffer;
 }
 
+void HandleSysCall_Exec()
+{
+	int virtAddr = kernel->machine->ReadRegister(4);			 // doc dia chi ten chuong trinh tu thanh ghi r4
+	char *name = User2System(virtAddr, MaxFileLength + 1); // Lay ten chuong trinh, nap vao kernel
+	if (name == NULL)
+	{
+		DEBUG(dbgSys, "\n Not enough memory in System");
+		ASSERT(false);
+		kernel->machine->WriteRegister(2, -1);
+		return;
+	}
+	kernel->machine->WriteRegister(2, SysExec(name));
+	// DO NOT DELETE NAME, THE THEARD WILL DELETE IT LATER
+	// delete[] name;
+
+	return;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
 
-	DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
+	// DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
 	switch (which)
 	{
+	case NoException: // return control to kernel
+		kernel->interrupt->setStatus(SystemMode);
+		DEBUG(dbgSys, "Switch to system mode\n");
+		break;
+	case PageFaultException:
+	case ReadOnlyException:
+	case BusErrorException:
+	case AddressErrorException:
+	case OverflowException:
+	case IllegalInstrException:
+	case NumExceptionTypes:
+		cerr << "Error " << which << " occurs\n";
+		SysHalt();
+		ASSERTNOTREACHED();
+
 	case SyscallException:
 		switch (type)
 		{
@@ -543,6 +576,11 @@ void ExceptionHandler(ExceptionType which)
 			/* Modify return point */
 			updateProgramCounter();
 
+			return;
+
+		case SC_Exec:
+			HandleSysCall_Exec();
+			updateProgramCounter();
 			return;
 
 			// ASSERTNOTREACHED();

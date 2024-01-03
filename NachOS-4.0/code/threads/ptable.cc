@@ -29,7 +29,6 @@ int PTable::ExecUpdate(char *name)
 {
   // Gọi mutex->P(); để giúp tránh tình trạng nạp 2 tiến trình cùng 1 lúc.
   bmsem->P();
-
   // Kiểm tra tính hợp lệ của chương trình “name”.
   // Kiểm tra sự tồn tại của chương trình “name” bằng cách gọi phương thức
   // Open của lớp fileSystem.
@@ -39,18 +38,17 @@ int PTable::ExecUpdate(char *name)
     bmsem->V();
     return -1;
   }
-  // So sánh tên chương trình và tên của currentThread để chắc chắn rằng
-  // chương trình này không gọi thực thi chính nó.
-  if (strcmp(name, kernel->currentThread->getName()) == 0)
-  {
-    DEBUG(dbgSys, "\nPTable::Exec : Can't not execute itself.\n");
-    bmsem->V();
-    return -1;
-  }
+  // // So sánh tên chương trình và tên của currentThread để chắc chắn rằng
+  // // chương trình này không gọi thực thi chính nó.
+  // if (strcmp(name, kernel->currentThread->getName()) == 0)
+  // {
+  //   DEBUG(dbgSys, "\nPTable::Exec : Can't not execute itself.\n");
+  //   bmsem->V();
+  //   return -1;
+  // }
 
   // Tìm slot trống trong bảng Ptable.
   int index = this->GetFreeSlot();
-
   // Check if have free slot
   if (index < 0)
   {

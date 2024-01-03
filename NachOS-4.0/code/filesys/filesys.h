@@ -39,7 +39,7 @@
 #include "filetable.h"
 
 #define MaxFileLength 32
-#define MAX_PROCESS 20
+#define MAX_PROCESS 10
 
 #ifdef FILESYS_STUB // Temporarily implement file system calls as
 										// calls to UNIX, until the real file system
@@ -47,15 +47,23 @@
 class FileSystem
 {
 public:
-	FileTable *fileTable;
+	FileTable **fileTable;
 	FileSystem()
 	{
-		fileTable = new FileTable();
+		fileTable = new FileTable *[MAX_PROCESS];
+		for (int i = 0; i < MAX_PROCESS; i++)
+		{
+			fileTable[i] = new FileTable();
+		}
 	}
 
 	~FileSystem()
 	{
-		delete fileTable;
+		for (int i = 0; i < MAX_PROCESS; i++)
+		{
+			delete fileTable[i];
+		}
+		delete[] fileTable;
 	}
 
 	bool Create(char *name, int initialSize)
@@ -70,7 +78,7 @@ public:
 
 	int Open(char *name, int openMode)
 	{
-		return fileTable->Insert(name, openMode);
+		return fileTable[this->FileTableIndex()]->Insert(name, openMode);
 	}
 
 	OpenFile *Open(char *name)
@@ -82,27 +90,29 @@ public:
 		return new OpenFile(fileDescriptor);
 	}
 
-	int Close(int id) { return fileTable->Remove(id); }
+	int FileTableIndex();
+
+	int Close(int id) { return fileTable[this->FileTableIndex()]->Remove(id); }
 
 	int Read(char *buffer, int charCount, int id)
 	{
-		return fileTable->Read(buffer, charCount, id);
+		return fileTable[this->FileTableIndex()]->Read(buffer, charCount, id);
 	}
 
 	int Write(char *buffer, int charCount, int id)
 	{
-		return fileTable->Write(buffer, charCount, id);
+		return fileTable[this->FileTableIndex()]->Write(buffer, charCount, id);
 	}
 
 	int Seek(int position, int id)
 	{
-		return fileTable->Seek(position, id);
+		return fileTable[this->FileTableIndex()]->Seek(position, id);
 	}
 
 	int Remove(char *name)
 	{
 		// cout << "Return from remove: " << fileTable->Remove(name) << endl;
-		int result = fileTable->Remove(name);
+		int result = fileTable[this->FileTableIndex()]->Remove(name);
 		if (result == 0)
 		{
 			Unlink(name);
@@ -112,8 +122,17 @@ public:
 
 	int SocketTCP()
 	{
-		return fileTable->CreateSocket();
+		return fileTable[this->FileTableIndex()]->CreateSocket();
 	}
+
+	void Renew(int id)
+	{
+		for (int i = 0; i < FILE_MAX; i++)
+		{
+			fileTable[id]->Remove(i);
+		}
+	}
+
 	// bool Remove(char *name) { return Unlink(name) == 0; }
 };
 

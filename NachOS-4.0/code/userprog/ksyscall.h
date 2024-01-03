@@ -135,4 +135,22 @@ int System2User(int virtAddr, int len, char *buffer)
   return i;
 }
 
+int SysExec(char *name)
+{
+  // cerr << "call: `" << name  << "`"<< endl;
+  OpenFile *oFile = kernel->fileSystem->Open(name);
+  if (oFile == NULL)
+  {
+    DEBUG(dbgSys, "\nExec:: Can't open this file.");
+    return -1;
+  }
+
+  delete oFile;
+
+  // Return child process id
+  return kernel->pTab->ExecUpdate(name);
+}
+
+int SysGetPid() { return kernel->currentThread->processID; }
+
 #endif /* ! __USERPROG_KSYSCALL_H__ */
