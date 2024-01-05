@@ -157,4 +157,44 @@ int SysExit(int id) { return kernel->pTab->ExitUpdate(id); }
 
 int SysGetPid() { return kernel->currentThread->processID; }
 
+int SysCreateSemaphore(char *name, int initialValue)
+{
+  int res = kernel->semTab->Create(name, initialValue);
+
+  if (res == -1)
+  {
+    DEBUG('a', "\nError creating semaphore");
+    delete[] name;
+    return -1;
+  }
+
+  return 0;
+}
+
+int SysWait(char *name)
+{
+  int res = kernel->semTab->Wait(name);
+
+  if (res == -1)
+  {
+    DEBUG('a', "\nSemaphore not found");
+    return -1;
+  }
+
+  return 0;
+}
+
+int SysSignal(char *name)
+{
+  int res = kernel->semTab->Signal(name);
+
+  if (res == -1)
+  {
+    DEBUG('a', "\nSemaphore not found");
+    return -1;
+  }
+
+  return 0;
+}
+
 #endif /* ! __USERPROG_KSYSCALL_H__ */

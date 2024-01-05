@@ -475,6 +475,63 @@ void HandleSysCall_Exit()
 	kernel->machine->WriteRegister(2, SysExit(id));
 }
 
+void HandleSysCall_CreateSemaphore()
+{
+	int virtAddr = kernel->machine->ReadRegister(4);
+	int semval = kernel->machine->ReadRegister(5);
+
+	char *name = User2System(virtAddr, MaxFileLength + 1);
+	if (name == NULL)
+	{
+		DEBUG(dbgSys, "\n Not enough memory in System");
+		ASSERT(false);
+		kernel->machine->WriteRegister(2, -1);
+		delete[] name;
+		return;
+	}
+
+	kernel->machine->WriteRegister(2, SysCreateSemaphore(name, semval));
+	delete[] name;
+}
+
+void HandleSysCall_Wait()
+{
+	int virtAddr = kernel->machine->ReadRegister(4);
+
+	char *name = User2System(virtAddr, MaxFileLength + 1);
+	if (name == NULL)
+	{
+		DEBUG(dbgSys, "\n Not enough memory in System");
+		ASSERT(false);
+		kernel->machine->WriteRegister(2, -1);
+		delete[] name;
+		return;
+	}
+
+	kernel->machine->WriteRegister(2, SysWait(name));
+	delete[] name;
+	return;
+}
+
+void HandleSysCall_Signal()
+{
+	int virtAddr = kernel->machine->ReadRegister(4);
+
+	char *name = User2System(virtAddr, MaxFileLength + 1);
+	if (name == NULL)
+	{
+		DEBUG(dbgSys, "\n Not enough memory in System");
+		ASSERT(false);
+		kernel->machine->WriteRegister(2, -1);
+		delete[] name;
+		return;
+	}
+
+	kernel->machine->WriteRegister(2, SysSignal(name));
+	delete[] name;
+	return;
+}
+
 void ExceptionHandler(ExceptionType which)
 {
 	int type = kernel->machine->ReadRegister(2);
@@ -601,6 +658,19 @@ void ExceptionHandler(ExceptionType which)
 			return;
 		case SC_Exit:
 			HandleSysCall_Exit();
+			updateProgramCounter();
+			return;
+		case SC_CreateSemaphore:
+			HandleSysCall_CreateSemaphore();
+			updateProgramCounter();
+			return;
+
+		case SC_Wait:
+			HandleSysCall_Wait();
+			updateProgramCounter();
+			return;
+		case SC_Signal:
+			HandleSysCall_Signal();
 			updateProgramCounter();
 			return;
 
