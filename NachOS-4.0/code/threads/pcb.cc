@@ -31,7 +31,8 @@ void StartProcess_2(void *pid)
   id = *((int *)pid);
   // Lay fileName cua process id nay
   char *fileName = kernel->pTab->GetFileName(id);
-
+  // printf(fileName);
+  DEBUG(dbgSys, fileName);
   AddrSpace *space;
   space = new AddrSpace(fileName);
 
@@ -57,7 +58,7 @@ int PCB::Exec(char *filename, int id)
 {
   // cerr << filename << ' ' << pid << endl;
   multex->P();
-
+  // printf(filename);
   this->thread = new Thread(filename, true);
   if (this->thread == NULL)
   {

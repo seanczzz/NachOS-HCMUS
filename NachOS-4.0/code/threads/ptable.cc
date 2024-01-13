@@ -68,7 +68,7 @@ int PTable::ExecUpdate(char *name)
 
   // Gọi thực thi phương thức Exec của lớp PCB.
   int pid = pcb[index]->Exec(name, index);
-
+  // DEBUG(dbgSys, name);
   // Gọi bmsem->V()
   bmsem->V();
   // Trả về kết quả thực thi của PCB->Exec.

@@ -109,12 +109,7 @@ AddrSpace::AddrSpace(char *fileName)
     OpenFile *executable = kernel->fileSystem->Open(fileName);
     NoffHeader noffH;
     unsigned int size, i, j, offset;
-    unsigned int numCodePage,
-        numDataPage; // số trang cho phần code và phần initData
 
-    int lastCodePageSize, lastDataPageSize, firstDataPageSize,
-        tempDataSize; // kích thước ghi vào trang cuối Code, initData, và trang
-                      // đầu của initData
     if (executable == NULL)
     {
         cerr << "Unable to open file " << fileName << "\n";
@@ -138,9 +133,9 @@ AddrSpace::AddrSpace(char *fileName)
     size = numPages * PageSize;
 
     ASSERT(numPages <= NumPhysPages); // check we're not trying
-                                      // to run anything too big --
-                                      // at least until we have
-                                      // virtual memory
+    // to run anything too big --
+    // at least until we have
+    // virtual memory
 
     // Check the available memory enough to load new process
     // debug
@@ -168,9 +163,7 @@ AddrSpace::AddrSpace(char *fileName)
         // a separate page, we could set its
         // pages to be read-only
         // xóa các trang này trên memory
-        bzero(&(kernel->machine
-                    ->mainMemory[pageTable[i].physicalPage * PageSize]),
-              PageSize);
+        bzero(&(kernel->machine->mainMemory[pageTable[i].physicalPage * PageSize]), PageSize);
         DEBUG(dbgAddr, "phyPage " << pageTable[i].physicalPage);
     }
 
