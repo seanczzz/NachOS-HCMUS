@@ -6,6 +6,7 @@ int main()
   char nd[MAX_LENGTH];
   int sizefile;
   int id;
+  Wait("catcop");
   Write("Nhap ten file: ", MAX_LENGTH, 1);
   Read(name, MAX_LENGTH, 0);
   id = Open(name, 1);
@@ -23,5 +24,6 @@ int main()
   {
     Write("Mo file that bai\n", MAX_LENGTH, 1);
   }
-  Halt();
+  // Halt();
+  Signal("catcop");
 }

@@ -3,9 +3,10 @@
 int main()
 {
   int pingPID, pongPID;
+  CreateSemaphore("catcop", 1);
   // Write("Ping pong test starting...\n\n", 200, 1);
-  pingPID = Exec("ping");
-  pongPID = Exec("pong");
+  pingPID = Exec("cat");
+  pongPID = Exec("copy");
 
   Join(pingPID);
   Join(pongPID);

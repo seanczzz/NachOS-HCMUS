@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
   char nd2[MAX_LENGTH + 1];
   int size1, siz2, id1, id2;
   int kq = 0;
+  Wait("catcop");
   Write("Nhap file1: ", MAX_LENGTH, 1);
   Read(file1, MAX_LENGTH, 0);
   Write("Nhap file2: ", MAX_LENGTH, 1);
@@ -47,5 +48,6 @@ int main(int argc, char *argv[])
   {
     Write("Thanh cong\n", MAX_LENGTH, 1);
   }
-  Halt();
+  // Halt();
+  Signal("catcop");
 }

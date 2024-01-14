@@ -2,11 +2,15 @@
 int main()
 {
     int i;
-    CreateSemaphore("ping", 1);
-    for (i = 0; i < 100; i++)
+    int j;
+    // CreateSemaphore("ping", 1);
+    for (i = 0; i < 1000; i++)
     {
-        Wait("ping");
-        Write("A", 1, 1);
-        Signal("ping");
+        // Wait("ping");
+        // Write("A", 1, 1);
+
+        Write("A ", 2, 1);
+        // Write(" ", 1, 1);
+        // Signal("ping");
     }
 }
